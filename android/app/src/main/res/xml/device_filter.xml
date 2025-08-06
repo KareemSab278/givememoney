@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <usb-device vendor-id="1027" product-id="24533" />
+  <!-- "0403" and "6015" will be interpreted as strings, causing no device match. Android wants decimals -->
+</resources>

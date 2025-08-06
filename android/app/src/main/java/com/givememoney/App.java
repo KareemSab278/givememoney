@@ -18,8 +18,9 @@ public class App {
     static vmc_vend_t.vend_session_t m_session;
     private static int m_runninng_session_id = 0;
 
-    public static int VENDOR_ID = 0;
-    public static int PRODUCT_ID = 0;
+    public static int VENDOR_ID = 1027; // decimal for 0x0403
+    public static int PRODUCT_ID = 24597; // decimal for 0x6015
+    // if these dont work then use hexa instead.
 
     public static class MyVendCallbacks implements vmc_vend_t.vend_callbacks_t {
 
@@ -47,7 +48,7 @@ public class App {
         @Override
         public boolean onVendApproved(vmc_vend_t.vend_session_t session) {
             System.out.println("✅ Vend Approved: Funds available = " + session.funds_avail);
-            return true; 
+            return true;
         }
 
         @Override
