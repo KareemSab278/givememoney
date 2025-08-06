@@ -93,6 +93,14 @@ android {
             keyPassword 'android'
         }
     }
+    sourceSets {
+        main {
+            java {
+                srcDirs = ['src/main/java']
+            }
+            jniLibs.srcDirs = ['libs'] // optional, only if your JARs have native .so files
+        }
+    }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
@@ -108,7 +116,11 @@ android {
 }
 
 dependencies {
-    // The version of react-native is set by the React Native Gradle Plugin
+    // implementation fileTree(dir: 'libs', include: ['*.jar'])
+    // implementation files('libs/marshall-java-sdk.jar', 'libs/jSerialComm-2.11.0.jar')
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+
     implementation("com.facebook.react:react-android")
 
     if (hermesEnabled.toBoolean()) {
