@@ -82,8 +82,8 @@ android {
     namespace "com.givememoney"
     defaultConfig {
         applicationId "com.givememoney"
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdkVersion 24
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
     }
@@ -122,8 +122,9 @@ dependencies {
     // implementation files('libs/marshall-java-sdk.jar', 'libs/jSerialComm-2.11.0.jar')
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-
     implementation("com.facebook.react:react-android")
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

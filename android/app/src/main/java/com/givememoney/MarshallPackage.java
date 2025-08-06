@@ -1,4 +1,6 @@
 package com.givememoney;
+import com.givememoney.MarshallModule;
+
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;

@@ -1,38 +1,28 @@
 package com.givememoney;
+import com.givememoney.MarshallModule;
 
-import android.content.Context;
-import android.hardware.usb.UsbManager;
 
-import com.facebook.react.bridge.Promise;
+import com.facebook.react.ReactPackage;
+import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContextBaseJavaModule;
-import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.uimanager.ViewManager;
 
-public class AppModule extends ReactContextBaseJavaModule {
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-    private final ReactApplicationContext reactContext;
+public class MyAppPackage implements ReactPackage {
 
-    public AppModule(ReactApplicationContext reactContext) {
-        super(reactContext);
-        this.reactContext = reactContext;
+    @Override
+    public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
+        List<NativeModule> modules = new ArrayList<>();
+        modules.add(new AppModule(reactContext));
+        modules.add(new MarshallModule(reactContext)); // add your other modules here
+        return modules;
     }
 
     @Override
-    public String getName() {
-        return "AppModule";
-    }
-
-    @ReactMethod
-    public void getUsbManager(Promise promise) {
-        try {
-            UsbManager usbManager = (UsbManager) reactContext.getSystemService(Context.USB_SERVICE);
-            if (usbManager != null) {
-                promise.resolve("UsbManager is available");
-            } else {
-                promise.reject("USB_MANAGER_ERROR", "UsbManager not available");
-            }
-        } catch (Exception e) {
-            promise.reject("USB_MANAGER_ERROR", e);
-        }
+    public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
+        return Collections.emptyList();
     }
 }

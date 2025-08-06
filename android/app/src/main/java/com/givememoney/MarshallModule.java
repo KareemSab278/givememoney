@@ -1,67 +1,145 @@
-public class MarshallModule extends ReactContextBaseJavaModule {
 
-    private final UsbManager usbManager;
-    ReactApplicationContext context;
+package com.givememoney;
+import com.givememoney.App;
+import android.os.Handler;
+import android.os.Looper;
 
-    public MarshallModule(ReactApplicationContext reactContext) {
-        super(reactContext);
-        this.context = reactContext;
-        usbManager = (UsbManager) reactContext.getSystemService(Context.USB_SERVICE);
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.app.PendingIntent;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbManager;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.util.Log;
+
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContextBaseJavaModule;
+import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.Promise;
+
+
+public MarshallModule(ReactApplicationContext reactContext) {
+    super(reactContext);
+    this.context = reactContext;
+    
+    // Delay USB initialization for Android 8 compatibility
+    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+        try {
+            usbManager = (UsbManager) reactContext.getSystemService(Context.USB_SERVICE);
+            if (usbManager == null) {
+                Log.e(TAG, "USB Service not available");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "USB initialization error", e);
+        }
+    }, 1000); // 1 second delay
+}
+
+private boolean isAndroid8WithUsbIssues() {
+    return Build.VERSION.SDK_INT == Build.VERSION_CODES.O && 
+           !checkAndroid8UsbSupport();
+}
+
+private boolean checkAndroid8UsbSupport() {
+    try {
+        UsbManager manager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
+        return manager != null && manager.getDeviceList() != null;
+    } catch (Exception e) {
+        return false;
+    }
+}
+
+    private boolean isUsbSupported() {
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_USB_HOST);
     }
 
     @ReactMethod
     public void startPayment(double amount, Promise promise) {
-        UsbDevice device = findUsbDevice();
-        if (device == null) {
-            promise.reject("NO_DEVICE", "Payment device not found");
-            return;
+        try {
+            if (!isUsbSupported()) {
+                promise.reject("USB_NOT_SUPPORTED", "USB host mode not supported");
+                return;
+            }
+
+            if (usbManager == null) {
+                promise.reject("USB_SERVICE_UNAVAILABLE", "USB service not available");
+                return;
+            }
+
+            UsbDevice device = findUsbDevice();
+            if (device == null) {
+                promise.reject("NO_DEVICE", "Payment device not found");
+                return;
+            }
+
+            if (!usbManager.hasPermission(device)) {
+                requestUsbPermission(device, amount, promise);
+            } else {
+                processPayment(amount, promise);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Payment error", e);
+            promise.reject("UNKNOWN_ERROR", e.getMessage());
+        }
+    }
+
+    private void requestUsbPermission(UsbDevice device, double amount, Promise promise) {
+        final String ACTION_USB_PERMISSION = "com.givememoney.USB_PERMISSION";
+
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            flags |= PendingIntent.FLAG_IMMUTABLE;
         }
 
-        if (!usbManager.hasPermission(device)) {
-            final String ACTION_USB_PERMISSION = "com.givememoney.USB_PERMISSION";
-            PendingIntent permissionIntent = PendingIntent.getBroadcast(
-                getReactApplicationContext(), 0, new Intent(ACTION_USB_PERMISSION), 0);
+        PendingIntent permissionIntent = PendingIntent.getBroadcast(
+                context,
+                0,
+                new Intent(ACTION_USB_PERMISSION),
+                flags);
 
-            BroadcastReceiver usbReceiver = new BroadcastReceiver() {
-                public void onReceive(Context context, Intent intent) {
-                    String action = intent.getAction();
-                    if (ACTION_USB_PERMISSION.equals(action)) {
-                        synchronized (this) {
-                            if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                                try {
-                                    short cents = (short) (amount * 100);
-                                    App.startPayment(cents, getReactApplicationContext());
-                                    promise.resolve("Payment started after permission");
-                                } catch (Exception e) {
-                                    promise.reject("PAYMENT_ERR", e);
-                                }
-                            } else {
-                                promise.reject("PERMISSION_DENIED", "USB permission denied");
-                            }
-                            getReactApplicationContext().unregisterReceiver(this);
+        BroadcastReceiver usbReceiver = new BroadcastReceiver() {
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (ACTION_USB_PERMISSION.equals(action)) {
+                    synchronized (this) {
+                        context.unregisterReceiver(this);
+                        if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+                            processPayment(amount, promise);
+                        } else {
+                            promise.reject("PERMISSION_DENIED", "USB permission denied");
                         }
                     }
                 }
-            };
-
-            getReactApplicationContext().registerReceiver(usbReceiver, new IntentFilter(ACTION_USB_PERMISSION));
-            usbManager.requestPermission(device, permissionIntent);
-        } else {
-            try {
-                short cents = (short) (amount * 100);
-                App.startPayment(cents, getReactApplicationContext());
-                promise.resolve("Payment started");
-            } catch (Exception e) {
-                promise.reject("PAYMENT_ERR", e);
             }
+        };
+
+        context.registerReceiver(usbReceiver, new IntentFilter(ACTION_USB_PERMISSION));
+        usbManager.requestPermission(device, permissionIntent);
+    }
+
+    private void processPayment(double amount, Promise promise) {
+        try {
+            short cents = (short) (amount * 100);
+            App.startPayment(cents, context);
+            promise.resolve("Payment started successfully");
+        } catch (Exception e) {
+            Log.e(TAG, "Payment processing error", e);
+            promise.reject("PAYMENT_ERROR", e.getMessage());
         }
     }
 
     private UsbDevice findUsbDevice() {
-        for (UsbDevice device : usbManager.getDeviceList().values()) {
-            if (device.getVendorId() == 1027 && device.getProductId() == 24533) { // Your vendor/product IDs
-                return device;
+        try {
+            for (UsbDevice device : usbManager.getDeviceList().values()) {
+                if (device.getVendorId() == 1027 && device.getProductId() == 24597) {
+                    return device;
+                }
             }
+        } catch (Exception e) {
+            Log.e(TAG, "Error finding USB device", e);
         }
         return null;
     }
