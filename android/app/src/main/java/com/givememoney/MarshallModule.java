@@ -1,55 +1,73 @@
-// testing the thing based on youtube tutorial
-package com.givememoney;
-
-import android.util.Log;
-
-import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContextBaseJavaModule;
-import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.Callback;
-import com.facebook.react.bridge.Promise;
-import com.givememoney.App; // Add this import
-
 public class MarshallModule extends ReactContextBaseJavaModule {
 
-    private static int eventCount = 0;
+    private final UsbManager usbManager;
     ReactApplicationContext context;
 
     public MarshallModule(ReactApplicationContext reactContext) {
         super(reactContext);
         this.context = reactContext;
+        usbManager = (UsbManager) reactContext.getSystemService(Context.USB_SERVICE);
     }
 
     @ReactMethod
-    public void createEventPromise(String name, Promise promise) {
-        try {
-            Log.d("MarshallModule", "Promise Event Created: " + name);
-
-            if (name.startsWith("PAYMENT:")) {
-                String amountStr = name.split(":")[1];
-                short amount = (short) (Float.parseFloat(amountStr) * 100);
-
-                App.startPayment(amount, getReactApplicationContext());
-
-                Log.d("MarshallModule", "Payment started for amount: " + amountStr);
-
-                promise.resolve("Payment started for " + amountStr);
-            } else {
-                promise.resolve("Promise created: " + name);
-            }
-        } catch (Exception e) {
-            promise.reject("ERR", e);
+    public void startPayment(double amount, Promise promise) {
+        UsbDevice device = findUsbDevice();
+        if (device == null) {
+            promise.reject("NO_DEVICE", "Payment device not found");
+            return;
         }
+
+        if (!usbManager.hasPermission(device)) {
+            final String ACTION_USB_PERMISSION = "com.givememoney.USB_PERMISSION";
+            PendingIntent permissionIntent = PendingIntent.getBroadcast(
+                getReactApplicationContext(), 0, new Intent(ACTION_USB_PERMISSION), 0);
+
+            BroadcastReceiver usbReceiver = new BroadcastReceiver() {
+                public void onReceive(Context context, Intent intent) {
+                    String action = intent.getAction();
+                    if (ACTION_USB_PERMISSION.equals(action)) {
+                        synchronized (this) {
+                            if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+                                try {
+                                    short cents = (short) (amount * 100);
+                                    App.startPayment(cents, getReactApplicationContext());
+                                    promise.resolve("Payment started after permission");
+                                } catch (Exception e) {
+                                    promise.reject("PAYMENT_ERR", e);
+                                }
+                            } else {
+                                promise.reject("PERMISSION_DENIED", "USB permission denied");
+                            }
+                            getReactApplicationContext().unregisterReceiver(this);
+                        }
+                    }
+                }
+            };
+
+            getReactApplicationContext().registerReceiver(usbReceiver, new IntentFilter(ACTION_USB_PERMISSION));
+            usbManager.requestPermission(device, permissionIntent);
+        } else {
+            try {
+                short cents = (short) (amount * 100);
+                App.startPayment(cents, getReactApplicationContext());
+                promise.resolve("Payment started");
+            } catch (Exception e) {
+                promise.reject("PAYMENT_ERR", e);
+            }
+        }
+    }
+
+    private UsbDevice findUsbDevice() {
+        for (UsbDevice device : usbManager.getDeviceList().values()) {
+            if (device.getVendorId() == 1027 && device.getProductId() == 24533) { // Your vendor/product IDs
+                return device;
+            }
+        }
+        return null;
     }
 
     @Override
     public String getName() {
         return "MarshallModule";
-    }
-
-    @ReactMethod
-    public void createEvent(String name, Callback callback) {
-        Log.d("MarshallModule", "Event Created: " + name);
-        callback.invoke("Created: " + name);
     }
 }
