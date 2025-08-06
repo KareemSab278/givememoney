@@ -7,8 +7,6 @@ import android.os.Bundle
 import android.widget.Toast
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
-import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
-import com.facebook.react.defaults.DefaultReactActivityDelegate
 
 class MainActivity : ReactActivity() {
 
@@ -31,11 +29,16 @@ class MainActivity : ReactActivity() {
 
     private fun handleUsbIntent(intent: Intent) {
         if (intent.action == UsbManager.ACTION_USB_DEVICE_ATTACHED) {
+            val device = intent.getParcelableExtra<android.hardware.usb.UsbDevice>(UsbManager.EXTRA_DEVICE)
+            if (device != null) {
+                Toast.makeText(this, "USB device attached: ${device.deviceName}", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
     override fun getMainComponentName(): String = "givememoney"
 
-    override fun createReactActivityDelegate(): ReactActivityDelegate =
-        DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)
+    override fun createReactActivityDelegate(): ReactActivityDelegate {
+        return object : ReactActivityDelegate(this, mainComponentName) {}
+    }
 }

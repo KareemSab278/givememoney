@@ -19,7 +19,7 @@ class MainApplication : Application(), ReactApplication {
 
     override fun getJSMainModuleName() = "index"
     override fun getUseDeveloperSupport() = BuildConfig.DEBUG
-    override val isNewArchEnabled = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED
+    override val isNewArchEnabled = false
     override val isHermesEnabled = BuildConfig.IS_HERMES_ENABLED
   }
 
