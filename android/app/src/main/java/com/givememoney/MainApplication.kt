@@ -1,26 +1,27 @@
 package com.givememoney
 
 import android.app.Application
-import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactNativeHost
 import com.facebook.react.ReactPackage
-import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.soloader.SoLoader
 
 class MainApplication : Application(), ReactApplication {
 
-  override val reactNativeHost: ReactNativeHost = object : DefaultReactNativeHost(this) {
+  private val mReactNativeHost: ReactNativeHost = object : ReactNativeHost(this) {
+    override fun getUseDeveloperSupport() = BuildConfig.DEBUG
+
     override fun getPackages(): List<ReactPackage> {
-      val packages = PackageList(this).packages.toMutableList()
-      packages.add(MyAppPackage())
-      return packages
+      return listOf(
+        MyAppPackage()
+      )
     }
 
     override fun getJSMainModuleName() = "index"
-    override fun getUseDeveloperSupport() = BuildConfig.DEBUG
-    override val isNewArchEnabled = false
-    override val isHermesEnabled = BuildConfig.IS_HERMES_ENABLED
+  }
+
+  override fun getReactNativeHost(): ReactNativeHost {
+    return mReactNativeHost
   }
 
   override fun onCreate() {
