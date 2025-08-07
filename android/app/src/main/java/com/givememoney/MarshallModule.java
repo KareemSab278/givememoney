@@ -36,7 +36,7 @@ public class MarshallModule extends ReactContextBaseJavaModule {
         super(reactContext);
         this.context = reactContext;
         
-        // Delay USB initialization for Android 8 compatibility
+        // Delay USB initialization for Android 8 compatibility!
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             try {
                 usbManager = (UsbManager) reactContext.getSystemService(Context.USB_SERVICE);
@@ -66,7 +66,7 @@ public class MarshallModule extends ReactContextBaseJavaModule {
         private boolean isUsbSupported() {
             return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_USB_HOST);
         }
-
+            // the error is here in this method somewhere...
         @ReactMethod
         public void startPayment(double amount, Promise promise) {
             try {
@@ -199,7 +199,8 @@ public class MarshallModule extends ReactContextBaseJavaModule {
                 port.open(connection);
                 port.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
 
-                promise.resolve("Serial port opened and configured");
+                promise.resolve("Serial port opened and configured"); // it works!
+
             } catch (Exception e) {
                 Log.e(TAG, "Serial init error", e);
                 promise.reject("SERIAL_ERROR", e.getMessage());
