@@ -1,7 +1,7 @@
-//version 0.0.8 - With MarshallModule support
+//version 0.0.6
 import React, { useEffect, useState } from 'react';
 import { NativeModules, Button, View, Text, StyleSheet } from 'react-native';
-// import { UsbSerialManager, Parity, Codes } from "react-native-usb-serialport-for-android";
+import { UsbSerialManager, Parity, Codes } from "react-native-usb-serialport-for-android";
 
 type MarshallModuleType = {
   createEvent: (name: string, callback: (msg: string) => void) => void;
@@ -31,8 +31,6 @@ const App = () => {
     return () => clearTimeout(timeout);
   }, []);
 
-  // USB functionality commented out until USB Serial package is properly linked
-  /*
   useEffect(() => {
     const runUsb = async () => {
       try {
@@ -55,7 +53,6 @@ const App = () => {
     };
     runUsb();
   }, []);
-  */
 
   return (
     <View style={{ padding: 20 }}>
