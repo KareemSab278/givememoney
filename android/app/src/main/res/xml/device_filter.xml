@@ -1,5 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <usb-device vendor-id="1027" product-id="24597" />
+  
+  <usb-device vendor-id="1027" product-id="24577" /> <!-- FT232R/FT232H -->
+  <usb-device vendor-id="1027" product-id="24592" /> <!-- FT2232C/D/H -->
+  <usb-device vendor-id="1027" product-id="24593" /> <!-- FT4232H -->
+  <usb-device vendor-id="1027" product-id="24596" /> <!-- FT232H -->
+  
+  <usb-device vendor-id="1659" product-id="8963" /> <!-- PL2303 -->
+  
+  <usb-device vendor-id="4292" product-id="60000" /> <!-- CP2102/CP2109 -->
+  
+  <usb-device vendor-id="6790" product-id="29987" /> <!-- CH340G -->
+  
   <!-- "0403" and "6015" will be interpreted as strings, causing no device match. Android wants decimals -->
+  <!-- 
+  Decimal conversions:
+  FTDI: 0x0403 = 1027, 0x6015 = 24597
+  Prolific: 0x067B = 1659, 0x2303 = 8963  
+  Silicon Labs: 0x10C4 = 4292, 0xEA60 = 60000
+  CH340: 0x1A86 = 6790, 0x7523 = 29987
+  -->
 </resources>
