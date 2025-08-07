@@ -11,13 +11,14 @@
   },
   "dependencies": {
     "react": "18.2.0",
-    "react-native": "^0.71.7"
+    "react-native": "^0.71.7",
+    "react-native-usb-serialport-for-android": "^0.5.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@babel/preset-env": "^7.25.3",
     "@babel/runtime": "^7.25.0",
-    "@react-native-community/cli": "9.2.1",
+    "@react-native-community/cli": "^19.1.1",
     "@react-native-community/cli-platform-android": "9.2.1",
     "@react-native-community/cli-platform-ios": "9.2.1",
     "@types/jest": "^29.5.13",

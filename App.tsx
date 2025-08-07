@@ -1,6 +1,26 @@
 //version 0.0.2
 import React, { useEffect, useState } from 'react';
 import { NativeModules, Button, View, Text, StyleSheet } from 'react-native';
+import { UsbSerialManager, Parity, Codes } from "react-native-usb-serialport-for-android";
+// ...
+const devices = await UsbSerialManager.list();
+
+try {
+  await UsbSerialManager.tryRequestPermission(2004);
+  const usbSerialport = await UsbSerialManager.open(2004, { baudRate: 38400, parity: Parity.None, dataBits: 8, stopBits: 1 });
+
+  const sub = usbSerialport.onReceived((event) => {
+    console.log(event.deviceId, event.data);
+  });
+
+  await usbSerialport.send('00FF');
+  
+  usbSerialport.close();
+} catch(err) {
+  console.log(err);
+  if (err.code === Codes.DEVICE_NOT_FOND) {
+  }
+}
 
 type MarshallModuleType = {
   createEvent: (name: string, callback: (msg: string) => void) => void;
