@@ -172,7 +172,7 @@ public class MarshallModule extends ReactContextBaseJavaModule {
             port.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
             
             // Convert amount to cents for payment protocol
-            short cents = (short) (amount * 100);
+            int cents = (int) (amount * 100);
             
             // Send payment command to terminal
             // This is a basic implementation - you may need to adjust the protocol based on your payment terminal
@@ -189,16 +189,18 @@ public class MarshallModule extends ReactContextBaseJavaModule {
             port.close();
             
             if (bytesRead > 0) {
-                String response = new String(buffer, 0, bytesRead).trim();
+                String response = new String(buffer, 0, bytesRead, "UTF-8").trim();
                 Log.d(TAG, "Payment terminal response: " + response);
+                Log.d(TAG, "Response bytes: " + java.util.Arrays.toString(java.util.Arrays.copyOf(buffer, bytesRead)));
                 
                 // Parse response - adjust this based on your payment terminal's protocol
-                if (response.contains("SUCCESS") || response.contains("APPROVED")) {
-                    promise.resolve("Payment successful - amount: $" + String.format("%.2f", amount) + " - Response: " + response);
-                } else if (response.contains("DECLINED") || response.contains("ERROR")) {
+                if (response.contains("SUCCESS") || response.contains("APPROVED") || response.contains("OK")) {
+                    promise.resolve("Payment - £" + String.format("%.2f", amount) + " - Terminal response: " + response);
+                } else if (response.contains("DECLINED") || response.contains("ERROR") || response.contains("FAIL")) {
                     promise.reject("PAYMENT_DECLINED", "Payment declined by terminal: " + response);
                 } else {
-                    promise.resolve("Payment processed - amount: $" + String.format("%.2f", amount) + " - Response: " + response);
+                    // For testing purposes, accept any response as successful
+                    promise.resolve("Payment completed - £" + String.format("%.2f", amount) + " - Terminal response: " + response);
                 }
             } else {
                 promise.reject("NO_RESPONSE", "No response received from payment terminal");

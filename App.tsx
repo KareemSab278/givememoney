@@ -94,10 +94,10 @@ const App = () => {
 
       <View style={{ padding: 10 }}>
         <Button
-          title="Make a Payment (0.10)"
+          title="Make a Payment (£0.10)"
           onPress={async () => {
             try {
-              const res = await MarshallModule.startPayment(1000);
+              const res = await MarshallModule.startPayment(0.10);
               setMessage(`Payment result: ${res}`);
             } catch (error: any) {
               setMessage(`Error: ${error.message || error}`);
