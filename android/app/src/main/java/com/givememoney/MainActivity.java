@@ -5,9 +5,11 @@ import android.content.pm.PackageManager;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
+import java.util.HashMap;
 
 public class MainActivity extends ReactActivity {
 
@@ -37,6 +39,16 @@ public class MainActivity extends ReactActivity {
             UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
             if (device != null) {
                 Toast.makeText(this, "USB device attached: " + device.getDeviceName(), Toast.LENGTH_SHORT).show();
+                UsbManager usbManager = (UsbManager) getSystemService(USB_SERVICE);
+                HashMap<String, UsbDevice> deviceList = usbManager.getDeviceList();
+
+                for (UsbDevice usbDevice : deviceList.values()) {
+                    int vendorId = usbDevice.getVendorId();
+                    int productId = usbDevice.getProductId();
+                    String deviceName = usbDevice.getDeviceName();
+
+                    Log.d("USB", "Found device: " + deviceName + " (VID: " + vendorId + ", PID: " + productId + ")");
+                }
             }
         }
     }
@@ -48,6 +60,7 @@ public class MainActivity extends ReactActivity {
 
     @Override
     protected ReactActivityDelegate createReactActivityDelegate() {
-        return new ReactActivityDelegate(this, getMainComponentName()) {};
+        return new ReactActivityDelegate(this, getMainComponentName()) {
+        };
     }
 }

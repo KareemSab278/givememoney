@@ -6,6 +6,8 @@ import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.soloader.SoLoader;
 import java.util.List;
+import java.util.Arrays;
+import java.util.ArrayList;
 
 public class MainApplication extends Application implements ReactApplication {
 

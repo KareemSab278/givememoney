@@ -19,13 +19,17 @@ const App = () => {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      MarshallModule.createEvent('Test', msg => {
-        setMessage(`Callback: ${msg}`);
-      });
+      if (MarshallModule) {
+        MarshallModule.createEvent('Test', msg => {
+          setMessage(`Callback: ${msg}`);
+        });
 
-      MarshallModule.createEventPromise('TestPromise')
-        .then(res => setMessage(`Promise: ${res}`))
-        .catch(err => setMessage(`Error: ${err}`));
+        MarshallModule.createEventPromise('TestPromise')
+          .then(res => setMessage(`Promise: ${res}`))
+          .catch(err => setMessage(`Error: ${err}`));
+      } else {
+        setMessage('MarshallModule not available');
+      }
     }, 2000);
 
     return () => clearTimeout(timeout);
