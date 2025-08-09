@@ -7,12 +7,8 @@ import com.facebook.react.shell.MainReactPackage;
 import java.util.Arrays;
 import java.util.List;
 
-// Manual imports for react-native packages that need to be linked manually
-// These correspond to the packages in your package.json
-// import com.bastengao.usbserialport.UsbSerialportForAndroidPackage; // Not available yet
-
 // Custom native modules
-import com.givememoney.MarshallPackage;
+import com.givememoney.PaymentPackage;
 
 public class PackageList {
   private Application application;
@@ -29,8 +25,7 @@ public class PackageList {
   public List<ReactPackage> getPackages() {
     return Arrays.<ReactPackage>asList(
       new MainReactPackage(),
-      new MarshallPackage()
-      // Note: UsbSerialportForAndroidPackage removed due to linking issues
+      new PaymentPackage()
       // Additional packages like AsyncStorage, WebView can be added here
     );
   }

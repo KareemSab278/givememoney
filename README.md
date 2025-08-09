@@ -1,97 +1,325 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# **GiveMeMoney - Payment Terminal Integration**
 
-# Getting Started
+## **Project Overview**
+React Native Android app that integrates with USB payment terminals (Nayax and generic devices) for processing payments.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+---
 
-## Step 1: Start Metro
+## **📋 Requirements**
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+### **Development Environment:**
+- **Node.js**: 16.x or 18.x
+- **Java**: JDK 17.0.2 (REQUIRED - exact version)
+- **Android Studio**: Latest version (for SDK and emulator)
+- **React Native CLI**: `npm install -g react-native-cli`
+- **ADB (Android Debug Bridge)**: For device communication and debugging
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+### **System Requirements:**
+- **Windows 10/11** (current setup)
+- **Android SDK API 33** (minimum API 21)
+- **USB Host Support** on target Android device
 
-```sh
-# Using npm
-npm start
+### **Hardware:**
+- **Android device** with USB OTG/Host capability
+- **Payment terminals**: Marshall, Nayax, or generic USB serial devices
+- **USB cables** (obviously...)
 
-# OR using Yarn
-yarn start
+---
+
+## **🚀 Setup Instructions**
+
+### **1. Clone Repository**
+```bash
+git clone https://github.com/KareemSab278/givememoney.git
+cd givememoney
 ```
 
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
-
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
+### **2. Install Dependencies**
+```bash
+npm install
 ```
 
-### iOS
+### **3. Environment Setup**
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+#### **Java Setup (CRITICAL):**
+```powershell
+# Verify Java 17.0.2 is installed (EXACT VERSION REQUIRED)
+java --version
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
+# Set JAVA_HOME (different on linux and bigmac)
+$env:JAVA_HOME = "C:\Program Files\Java\jdk-17"
 ```
 
-Then, and every time you update your native dependencies, run:
+**⚠️ IMPORTANT**: Only Java 17.0.2 is supported. Other versions may cause build failures.
 
-```sh
-bundle exec pod install
+#### **Android SDK + ADB Setup:**
+1. Install **Android Studio** (includes ADB automatically)
+2. Open Android Studio → SDK Manager
+3. Install:
+   - **Android SDK Platform 33**
+   - **Android SDK Build-Tools 33.0.0+**
+   - **Android SDK Platform-Tools** (includes ADB)
+
+4. Set environment variables:
+```powershell
+$env:ANDROID_HOME = "C:\Users\[username]\AppData\Local\Android\Sdk"
+$env:PATH = "$env:ANDROID_HOME\platform-tools;$env:PATH"
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+5. **Verify ADB Installation:**
+```powershell
+adb version
+# Should show ADB version and confirm installation
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+### **4. Device Setup & Testing**
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+#### **Android Device Requirements:**
+- **USB OTG/Host support** enabled
+- **Developer options** enabled
+- **USB debugging** enabled
+- **ADB connection** working
 
-## Step 3: Modify your app
+#### **Verify Device Connection:**
+```bash
+# Connect Android device via USB
+adb devices
+# Should list your device with "device" status
+```
 
-Now that you have successfully run the app, let's make changes!
+### **5. Build Project**
+```bash
+# Build Android APK
+cd android
+./gradlew assembleDebug
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+# Or build and run on device (recommended)
+cd ..
+npx react-native run-android
+```
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+---
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+## **📱 Project Structure**
 
-## Congratulations! :tada:
+### **Key Files (5 total):**
+```
+android/app/src/main/java/com/givememoney/
+├── PaymentModule.java          # Main payment logic & USB communication
+├── PaymentPackage.java         # React Native bridge registration  
+├── MainActivity.java           # USB intents + React Native lifecycle
+├── MainApplication.java        # App initialization
+└── PackageList.java           # Package registration
 
-You've successfully run and modified your React Native App. :partying_face:
+App.tsx                        # React Native UI and payment buttons
+```
 
-### Now what?
+### **Consolidated Architecture:**
+- **PaymentModule.java**: All payment logic, USB handling, multi-device support
+- **App.tsx**: Simple UI with payment testing buttons
+- **Clean bridge**: Single module, no conflicts
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+---
 
-# Troubleshooting
+## **🔧 Building & Testing**
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+### **Prerequisites Check:**
+```bash
+# Verify all requirements before building
+java --version          # Must be 17.0.2
+adb version            # Must show ADB installed
+adb devices            # Must show connected Android device
+```
 
-# Learn More
+### **Debug Build:**
+```bash
+cd android
+./gradlew assembleDebug
+```
 
-To learn more about React Native, take a look at the following resources:
+### **Release Build:**
+```bash
+cd android  
+./gradlew assembleRelease
+```
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+### **Run on Device:**
+```bash
+# Connect Android device via USB and enable USB debugging
+adb devices              # Verify device connected
+npx react-native run-android
+```
+
+### **View Logs:**
+```bash
+npx react-native log-android
+# OR
+adb logcat -s ReactNativeJS (recommended)
+```
+
+---
+
+## **💳 Payment Device Support**
+
+### **Supported Devices:**
+- **Marshall Payment Terminals** (VID: 1027, PID: 24597)
+- **Nayax Payment Devices** (Various VID/PIDs) 
+- **Generic USB Serial** payment devices
+
+### **Protocols:** (i have no clue what these mean)
+- **Marshall**: VMC framework protocol (115200 baud)
+- **Nayax**: Generic serial protocol (38400 baud) 
+- **Generic**: Configurable baud rates
+
+---
+
+## **🎯 Testing the App**
+
+### **Available Functions:**
+1. **"Callback"** - Test React Native bridge callbacks
+2. **"Promise"** - Test Promise-based communication
+3. **"Make a Payment (£0.10)"** - Process test payment
+4. **"Init Serial"** - Initialize USB serial connection
+5. **"Get Device Info"** - List connected USB devices
+
+### **Testing Steps:**
+1. **Verify device connection**: `adb devices`
+2. **Connect payment device** via USB to Android device
+3. **Launch app**: `npx react-native run-android`
+4. **Test device detection**: Tap "Get Device Info"
+5. **Initialize connection**: Tap "Init Serial"
+6. **Test payment**: Tap "Make a Payment (£0.10)"
+
+### **Debugging:**
+```bash
+# Monitor logs during testing
+npx react-native log-android
+
+# Or filter for PaymentModule logs
+adb logcat -s PaymentModule
+```
+
+---
+
+## **⚠️ Troubleshooting**
+
+### **Common Issues:**
+
+#### **"JAVA_HOME not set" or "Wrong Java version"**
+```powershell
+# Install Java 17.0.2 EXACTLY - no other version
+java --version  # Must show 17.0.2
+$env:JAVA_HOME = "C:\Program Files\Java\jdk-17"
+```
+
+#### **"Android SDK not found"**
+```powershell
+$env:ANDROID_HOME = "C:\Users\[username]\AppData\Local\Android\Sdk"
+```
+
+#### **"ADB not found" or "Device not detected"**
+```bash
+# Install Android Studio (includes ADB)
+# OR manually add to PATH:
+$env:PATH = "$env:ANDROID_HOME\platform-tools;$env:PATH"
+
+# Test ADB
+adb version
+adb devices
+```
+
+#### **"PaymentModule not available"**
+- Rebuild project: `./gradlew clean assembleDebug`
+- Check React Native logs: `npx react-native log-android`
+- Verify device connected: `adb devices`
+
+#### **USB Permission Denied**
+- Ensure USB OTG/Host enabled on Android device
+- Check USB cable supports data transfer
+- Grant USB permissions when prompted in app
+- Enable Developer Options and USB Debugging
+
+#### **Build Failures**
+```bash
+# Clean and rebuild
+cd android
+./gradlew clean
+./gradlew assembleDebug
+
+# Check Java version
+java --version  # Must be exactly 17.0.2
+```
+
+---
+
+## **🔄 Development Workflow**
+
+### **Before Starting Development:**
+1. **Verify environment**:
+   ```bash
+   java --version     # 17.0.2
+   adb version       # Working
+   adb devices       # Android device connected
+   ```
+
+2. **Test base build**:
+   ```bash
+   ./gradlew assembleDebug
+   npx react-native run-android
+   ```
+
+### **Making Changes:**
+1. Edit code in Android Studio or VS Code
+2. Rebuild: `./gradlew assembleDebug`
+3. Test on device: `npx react-native run-android`
+4. Monitor logs: `npx react-native log-android`
+
+### **Adding New Payment Devices:**
+1. Update VID/PID detection in `PaymentModule.java`
+2. Add device-specific protocol in `processXXXPayment()` method
+3. Test with actual hardware using ADB debugging
+
+---
+
+## **📝 Version Info**
+- **Current Version**: 0.0.9
+- **React Native**: 0.71.x
+- **Target Android**: API 33
+- **Min Android**: API 21
+- **Java**: 17.0.2 (REQUIRED)
+
+---
+
+## **👥 Team Development**
+
+### **Environment Verification Checklist:**
+- [ ] Java 17.0.2 installed (`java --version`)
+- [ ] Android Studio installed
+- [ ] ADB working (`adb version`)
+- [ ] Android device connected (`adb devices`)
+- [ ] USB debugging enabled on device
+- [ ] Project builds successfully (`./gradlew assembleDebug`)
+- [ ] App launches on device (`npx react-native run-android`)
+
+### **Code Changes:**
+- **Payment logic**: Edit `PaymentModule.java`
+- **UI changes**: Edit `App.tsx`
+- **New devices**: Update `detectDeviceType()` in PaymentModule
+
+### **Testing Protocol:**
+1. Always verify device connection with `adb devices`
+2. Test with actual USB payment devices
+3. Monitor Android logs during testing
+4. Verify all 5 app buttons work correctly
+5. Test USB permission handling
+
+### **Required Tools for Development:**
+- **ADB**: Essential for device communication and debugging
+- **Java 17.0.2**: Exact version required for builds
+- **Android device**: With USB Host support for payment terminals
+
+---
+
+**Ready to build payments! 🚀💳**
+
+**Note**: This project requires physical Android devices with USB Host capability for payment terminal testing. Emulators cannot test USB payment device functionality.

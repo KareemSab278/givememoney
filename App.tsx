@@ -1,17 +1,18 @@
-//version 0.0.8 - With MarshallModule support
+//version 0.0.9 - With PaymentModule support (consolidated from MarshallModule)
 import React, { useEffect, useState } from 'react';
 import { NativeModules, Button, View, Text, StyleSheet } from 'react-native';
 // import { UsbSerialManager, Parity, Codes } from "react-native-usb-serialport-for-android";
 
-type MarshallModuleType = {
+type PaymentModuleType = {
   createEvent: (name: string, callback: (msg: string) => void) => void;
   createEventPromise: (name: string) => Promise<string>;
   startPayment: (amount: number) => Promise<string>;
   initSerial: () => Promise<string>;
+  getDeviceInfo: () => Promise<string>;
 };
 
-const { MarshallModule } = NativeModules as {
-  MarshallModule: MarshallModuleType;
+const { PaymentModule } = NativeModules as {
+  PaymentModule: PaymentModuleType;
 };
 
 const App = () => {
@@ -19,16 +20,16 @@ const App = () => {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      if (MarshallModule) {
-        MarshallModule.createEvent('Test', msg => {
+      if (PaymentModule) {
+        PaymentModule.createEvent('Test', msg => {
           setMessage(`Callback: ${msg}`);
         });
 
-        MarshallModule.createEventPromise('TestPromise')
+        PaymentModule.createEventPromise('TestPromise')
           .then(res => setMessage(`Promise: ${res}`))
           .catch(err => setMessage(`Error: ${err}`));
       } else {
-        setMessage('MarshallModule not available');
+        setMessage('PaymentModule not available');
       }
     }, 2000);
 
@@ -69,7 +70,7 @@ const App = () => {
         <Button
           title="Callback"
           onPress={() => {
-            MarshallModule.createEvent('From Button', msg => {
+            PaymentModule.createEvent('From Button', msg => {
               setMessage(`Button Callback: ${msg}`);
             });
           }}
@@ -81,7 +82,7 @@ const App = () => {
           title="Promise"
           onPress={async () => {
             try {
-              const res = await MarshallModule.createEventPromise(
+              const res = await PaymentModule.createEventPromise(
                 'From Button',
               );
               setMessage(`Button Promise: ${res}`);
@@ -97,7 +98,7 @@ const App = () => {
           title="Make a Payment (£0.10)"
           onPress={async () => {
             try {
-              const res = await MarshallModule.startPayment(0.10);
+              const res = await PaymentModule.startPayment(0.10);
               setMessage(`Payment result: ${res}`);
             } catch (error: any) {
               setMessage(`Error: ${error.message || error}`);
@@ -111,8 +112,22 @@ const App = () => {
           title="Init Serial"
           onPress={async () => {
             try {
-              const res = await MarshallModule.initSerial();
+              const res = await PaymentModule.initSerial();
               setMessage(`Serial result: ${res}`);
+            } catch (error: any) {
+              setMessage(`Error: ${error.message || error}`);
+            }
+          }}
+        />
+      </View>
+
+      <View style={{ padding: 10 }}>
+        <Button
+          title="Get Device Info"
+          onPress={async () => {
+            try {
+              const res = await PaymentModule.getDeviceInfo();
+              setMessage(`Device Info: ${res}`);
             } catch (error: any) {
               setMessage(`Error: ${error.message || error}`);
             }

@@ -1,6 +1,4 @@
 package com.givememoney;
-import com.givememoney.MarshallModule;
-
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;
@@ -11,13 +9,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class MyAppPackage implements ReactPackage {
+/**
+ * Consolidated React Native package for payment functionality
+ * Replaces both MarshallPackage and MyAppPackage
+ */
+public class PaymentPackage implements ReactPackage {
 
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
         List<NativeModule> modules = new ArrayList<>();
-        modules.add(new AppModule(reactContext));
-        modules.add(new MarshallModule(reactContext)); // add your other modules here
+        modules.add(new PaymentModule(reactContext));
         return modules;
     }
 
