@@ -1,4 +1,4 @@
-//version 0.0.9 - With PaymentModule support (consolidated from MarshallModule)
+//version 1.0.0 - NAYAX-ONLY Payment Module (Marshall removed)
 import React, { useEffect, useState } from 'react';
 import { NativeModules, Button, View, Text, StyleSheet } from 'react-native';
 // import { UsbSerialManager, Parity, Codes } from "react-native-usb-serialport-for-android";
@@ -7,6 +7,7 @@ type PaymentModuleType = {
   createEvent: (name: string, callback: (msg: string) => void) => void;
   createEventPromise: (name: string) => Promise<string>;
   startPayment: (amount: number) => Promise<string>;
+  startNayaxPayment: (amount: number) => Promise<string>;
   initSerial: () => Promise<string>;
   getDeviceInfo: () => Promise<string>;
 };
@@ -95,13 +96,27 @@ const App = () => {
 
       <View style={{ padding: 10 }}>
         <Button
-          title="Make a Payment (£0.10)"
+          title="🎯 NAYAX Payment (£0.10)"
           onPress={async () => {
             try {
               const res = await PaymentModule.startPayment(0.10);
               setMessage(`Payment result: ${res}`);
             } catch (error: any) {
               setMessage(`Error: ${error.message || error}`);
+            }
+          }}
+        />
+      </View>
+
+      <View style={{ padding: 10 }}>
+        <Button
+          title="Nayax Payment (£0.10)"
+          onPress={async () => {
+            try {
+              const res = await PaymentModule.startNayaxPayment(0.10);
+              setMessage(`Nayax Payment: ${res}`);
+            } catch (error: any) {
+              setMessage(`Nayax Error: ${error.message || error}`);
             }
           }}
         />
