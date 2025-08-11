@@ -56,6 +56,9 @@ public class PaymentModule extends ReactContextBaseJavaModule {
     private static final int NAYAX_PID_2 = 0xEA60; // CP2102/CP2109 USB to UART Bridge
     private static final int NAYAX_VID_3 = 0x067B; // Prolific - older Nayax models
     private static final int NAYAX_PID_3 = 0x2303; // PL2303 Serial Port
+    private static final int NAYAX_VID_4 = 0x0403; // current nayax reader VID
+    private static final int NAYAX_PID_4 = 0x6015; // current nayax reader PID
+    
 
     public PaymentModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -238,7 +241,8 @@ public class PaymentModule extends ReactContextBaseJavaModule {
         // Check for known NAYAX VID/PID combinations
         return (vid == NAYAX_VID_1 && pid == NAYAX_PID_1) ||
                (vid == NAYAX_VID_2 && pid == NAYAX_PID_2) ||
-               (vid == NAYAX_VID_3 && pid == NAYAX_PID_3);
+               (vid == NAYAX_VID_3 && pid == NAYAX_PID_3) ||
+               (vid == NAYAX_VID_4 && pid == NAYAX_PID_4);
     }
 
     private boolean isUsbSupported() {
@@ -298,16 +302,16 @@ public class PaymentModule extends ReactContextBaseJavaModule {
                     UsbSerialPort port = driver.getPorts().get(0);
                     port.open(connection);
                     
-                    // NAYAX typically uses 9600 or 38400 baud for MDB
+                    // NAYAX typically uses 9600 or 38400 or 150200 baud for Multi drop bus protocol
                     port.setParameters(38400, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
-                    
+
                     // Send NAYAX-specific MDB payment command
                     sendNayaxPaymentCommand(port, amount, promise);
                     return;
                 }
             }
             
-            promise.reject("NAYAX_DEVICE_ERROR", "Could not initialize NAYAX device");
+            promise.reject("NAYAX_DEVICE_ERROR", "Could not initialize NAYAX device (error in payment module line 314)");
             
         } catch (Exception e) {
             Log.e(TAG, "NAYAX payment error", e);

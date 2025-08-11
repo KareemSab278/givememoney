@@ -47,7 +47,7 @@ public class MainActivity extends ReactActivity {
         if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(intent.getAction())) {
             UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
             if (device != null) {
-                String deviceInfo = String.format("USB device attached: %s (VID: %d, PID: %d)", 
+                String deviceInfo = String.format("USB device attached: %s (VID: 0x0403, PID: 0x6015)", 
                     device.getDeviceName(), device.getVendorId(), device.getProductId());
                 
                 Toast.makeText(this, deviceInfo, Toast.LENGTH_SHORT).show();
